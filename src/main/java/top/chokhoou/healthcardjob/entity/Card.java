@@ -1,6 +1,7 @@
 package top.chokhoou.healthcardjob.entity;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import top.chokhoou.healthcardjob.common.converters.SpringBootJpaConverterListJson;
 
 import javax.persistence.Column;
@@ -18,6 +19,7 @@ import java.util.List;
  */
 @Data
 @Entity
+@Accessors(chain = true)
 public class Card {
     /**
      * id

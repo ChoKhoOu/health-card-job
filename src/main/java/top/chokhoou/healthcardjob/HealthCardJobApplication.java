@@ -6,9 +6,12 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableJpaAuditing
+/**
+ * @author Administrator
+ */
+@EnableRetry
 @EnableScheduling
-@EnableRetry(proxyTargetClass = true)
+@EnableJpaAuditing
 @SpringBootApplication
 public class HealthCardJobApplication {
 

@@ -1,6 +1,7 @@
 package top.chokhoou.healthcardjob.service;
 
 import top.chokhoou.healthcardjob.entity.Card;
+import top.chokhoou.healthcardjob.entity.dto.RegisterDTO;
 import top.chokhoou.healthcardjob.job.HealthCardJob;
 
 import java.net.HttpCookie;
@@ -26,8 +27,8 @@ public interface HealthCardService {
     /**
      * 注册学生信息
      *
-     * @param studentId 学号
+     * @param registerDTO 注册相关信息
      * @return 成功与否
      */
-    boolean registerStudent(String studentId);
+    boolean registerStudent(RegisterDTO registerDTO);
 }

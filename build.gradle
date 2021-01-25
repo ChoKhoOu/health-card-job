@@ -16,7 +16,7 @@ configurations {
 allprojects {
     repositories {
         maven { url 'https://maven.aliyun.com/repository/public/' }
-        maven { url 'https://maven.aliyun.com/repository/spring/'}
+        maven { url 'https://maven.aliyun.com/repository/spring/' }
         mavenLocal()
         mavenCentral()
     }
@@ -24,20 +24,23 @@ allprojects {
 repositories {
     mavenCentral()
 }
-
+//configurations.all {
+//    exclude module: 'logback-classic'
+//}
 dependencies {
+
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
+    compile 'cn.hutool:hutool-all:5.5.7'
+    compile group: 'org.springframework.retry', name: 'spring-retry'
+
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'com.h2database:h2'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-quartz'
-    compile 'cn.hutool:hutool-all:5.5.7'
-    compile group: 'org.springframework.retry', name: 'spring-retry'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-log4j2'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-    compile group: 'org.springframework.boot', name: 'spring-boot-starter-mail'
 }
 
 test {

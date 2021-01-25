@@ -11,8 +11,8 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class HealthCardJob {
-    @Scheduled(cron = "0 0 9 * * ? *")
-    public void commitHealthCard(){
+    @Scheduled(cron = "0 0 9 * * ?")
+    public void commitHealthCard() {
 
     }
 }
