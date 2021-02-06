@@ -12,11 +12,6 @@ import java.util.List;
 @Accessors(chain = true)
 public class CardDTO {
     /**
-     * id
-     */
-    private Long id;
-
-    /**
      * 申请人id
      */
     private Long sqrid;

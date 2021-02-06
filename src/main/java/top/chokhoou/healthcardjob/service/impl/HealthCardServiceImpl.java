@@ -9,7 +9,6 @@ import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
@@ -18,24 +17,20 @@ import top.chokhoou.healthcardjob.common.constants.CardConstant;
 import top.chokhoou.healthcardjob.common.constants.CommonConstant;
 import top.chokhoou.healthcardjob.common.enums.ENeedCommit;
 import top.chokhoou.healthcardjob.common.enums.ESchoolApiStatus;
-import top.chokhoou.healthcardjob.common.enums.ECommitLogStatus;
-import top.chokhoou.healthcardjob.dao.CardCommitLogDao;
-import top.chokhoou.healthcardjob.dao.CardDao;
 import top.chokhoou.healthcardjob.entity.Card;
-import top.chokhoou.healthcardjob.entity.CardCommitLog;
 import top.chokhoou.healthcardjob.entity.dto.CardDTO;
-import top.chokhoou.healthcardjob.entity.dto.RegisterDTO;
 import top.chokhoou.healthcardjob.service.HealthCardService;
-import top.chokhoou.healthcardjob.util.exception.BusinessException;
+import top.chokhoou.healthcardjob.util.cache.CacheHolder;
+
 import top.chokhoou.healthcardjob.util.exception.ServiceException;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author ChoKhoOu
@@ -46,15 +41,10 @@ public class HealthCardServiceImpl implements HealthCardService {
 
     private static final String TITLE_FORMAT = "%s %s 健康卡填报";
 
-    @Autowired
-    private CardDao cardDao;
-    @Autowired
-    private CardCommitLogDao cardCommitLogDao;
-
-
     @Override
     @Retryable(value = Exception.class, backoff = @Backoff(delay = 5000, multiplier = 2))
     public void commitHealthCard(Card card, HttpCookie[] cookies) {
+
         CardDTO cardDTO = buildCardDTO(card);
         JSONObject body = new JSONObject().set("entity", cardDTO);
         HttpResponse response = HttpRequest.post(CommonConstant.COMMIT_URL)
@@ -75,43 +65,18 @@ public class HealthCardServiceImpl implements HealthCardService {
             throw new ServiceException();
         }
 
-        // success
-        cardCommitLogDao.save(new CardCommitLog()
-                .setStudentId(card.getGh())
-                .setState(ECommitLogStatus.SUCCESS.getVal()));
+        //success
+        getCommitLogMap().put(card.getGh(), "Success");
     }
 
-    @Recover
-    public void fallback(Exception ex, Card card, HttpCookie[] cookies) {
-        log.error("commit card fail: studentId={}, reason=exceeded maximum number of retries.", card.getGh());
-        // TODO 发送短信 or 邮件
-
-        // failed
-        cardCommitLogDao.save(new CardCommitLog()
-                .setStudentId(card.getGh())
-                .setState(ECommitLogStatus.FAILED.getVal()));
-    }
 
     @Override
-    public boolean commitHealthCard(String studentId) {
-        Card card = cardDao.findByGh(studentId);
-        if (card == null) {
-            throw new BusinessException("找不到该学号相关健康卡信息");
-        }
-
-        HttpCookie[] cookies = getCookies();
-        commitHealthCard(card, cookies);
-        return true;
-    }
-
-    @Override
-    public boolean registerStudent(RegisterDTO registerDTO) {
-        HttpCookie[] cookies = getCookies();
+    public Card getStudent(String studentId, HttpCookie[] cookies) {
 
         JSONObject root = new JSONObject();
         JSONObject param = new JSONObject();
         root.set("querySqlId", "com.sudytech.work.jlzh.jkxxtb.jkxxcj.queryNear");
-        param.set("empcode", registerDTO.getStudentId());
+        param.set("empcode", studentId);
         root.set("params", param);
         HttpResponse getInfo = HttpRequest
                 .post(CommonConstant.QUERY_URL)
@@ -121,23 +86,20 @@ public class HealthCardServiceImpl implements HealthCardService {
 
         List<String> list = JSONUtil.toList(JSONUtil.parseObj(getInfo.body()).getJSONArray("list").toString(), String.class);
         if (list == null || list.isEmpty()) {
-            return false;
+            return null;
         }
         Card card = JSONUtil.parseObj(list.get(0), new JSONConfig().setIgnoreCase(true)).toBean(Card.class);
-        card.setRealEmail(registerDTO.getEmail())
-                .setRealPhone(registerDTO.getPhoneNum())
-                .setNeedCommit(ENeedCommit.YES.getValue())
+        card.setNeedCommit(ENeedCommit.YES.getValue())
                 .setCn(CardConstant.CN)
                 .set_ext(CardConstant.EXT)
                 .set__type(CardConstant.TYPE)
                 .setBz(CardConstant.BZ);
-
-        cardDao.save(card);
-
-        return true;
+        card.setId(null);
+        return card;
     }
 
-    private HttpCookie[] getCookies() {
+    @Override
+    public HttpCookie[] getCookies() {
         HttpResponse executionResponse = HttpRequest
                 .get(CommonConstant.EXECUTION_URL)
                 .timeout(2000)
@@ -175,6 +137,13 @@ public class HealthCardServiceImpl implements HealthCardService {
         return httpCookies.toArray(new HttpCookie[0]);
     }
 
+    @Recover
+    private void fallback(Exception ex, Card card, HttpCookie[] cookies) {
+        getCommitLogMap().put(card.getGh(), "Maximum number of retries: " + ex.getMessage());
+        log.error("commit card fail: studentId={}, reason=exceeded maximum number of retries.", card.getGh());
+    }
+
+
     private CardDTO buildCardDTO(Card card) {
         DateTime now = new DateTime();
         return new CardDTO().set__type(card.get__type())
@@ -208,7 +177,20 @@ public class HealthCardServiceImpl implements HealthCardService {
                 .setBt(String.format(TITLE_FORMAT, DateUtil.formatDate(now), card.getSqrmc()))
                 .setRysf(card.getRysf())
                 .setFdygh(card.getFdygh())
-                .setSqbmid(card.getSqbmid())
-                .setId(card.getId());
+                .setSqbmid(card.getSqbmid());
     }
+
+    private Map<String, String> getCommitLogMap() {
+        return getCommitLogMap(new DateTime());
+    }
+
+    private Map<String, String> getCommitLogMap(DateTime key) {
+        return getCommitLogMap(DateUtil.format(key, new SimpleDateFormat(CommonConstant.DATE_FORMAT_WITHOUT_SECOND)));
+    }
+
+    private Map<String, String> getCommitLogMap(String key) {
+        return CacheHolder.getStudentCommitLogCache().get(key, e -> new ConcurrentHashMap<>(16));
+    }
+
+
 }

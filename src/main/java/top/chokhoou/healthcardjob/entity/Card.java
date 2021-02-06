@@ -2,12 +2,8 @@ package top.chokhoou.healthcardjob.entity;
 
 import lombok.Data;
 import lombok.experimental.Accessors;
-import top.chokhoou.healthcardjob.common.converters.SpringBootJpaConverterListJson;
 
-import javax.persistence.Column;
-import javax.persistence.Convert;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+
 import java.util.List;
 
 /**
@@ -18,13 +14,11 @@ import java.util.List;
  * @author ChoKhoOu
  */
 @Data
-@Entity
 @Accessors(chain = true)
 public class Card {
     /**
      * id
      */
-    @Id
     private Long id;
 
     /**
@@ -175,8 +169,6 @@ public class Card {
     /**
      *
      */
-    @Convert(converter = SpringBootJpaConverterListJson.class)
-    @Column(columnDefinition = "TEXT")
     private List<String> cn;
 
     /**

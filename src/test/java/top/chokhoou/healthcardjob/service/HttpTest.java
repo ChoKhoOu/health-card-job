@@ -138,7 +138,6 @@ public class HttpTest {
                 .setBt(String.format(TITLE_FORMAT, DateUtil.formatDate(now), card.getSqrmc()))
                 .setRysf(card.getRysf())
                 .setFdygh(card.getFdygh())
-                .setSqbmid(card.getSqbmid())
-                .setId(card.getId());
+                .setSqbmid(card.getSqbmid());
     }
 }

@@ -1,8 +1,6 @@
 package top.chokhoou.healthcardjob.service;
 
 import top.chokhoou.healthcardjob.entity.Card;
-import top.chokhoou.healthcardjob.entity.dto.RegisterDTO;
-import top.chokhoou.healthcardjob.job.HealthCardJob;
 
 import java.net.HttpCookie;
 
@@ -17,18 +15,16 @@ public interface HealthCardService {
     void commitHealthCard(Card card, HttpCookie[] cookies);
 
     /**
-     * 提交健康卡
+     * 注册学生信息
      *
      * @param studentId 学号
      * @return 成功与否
      */
-    boolean commitHealthCard(String studentId);
+    Card getStudent(String studentId,HttpCookie[] cookies);
 
     /**
-     * 注册学生信息
-     *
-     * @param registerDTO 注册相关信息
-     * @return 成功与否
+     * 获取cookie
+     * @return cookies
      */
-    boolean registerStudent(RegisterDTO registerDTO);
+    HttpCookie[] getCookies();
 }
