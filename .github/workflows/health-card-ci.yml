@@ -115,7 +115,7 @@ jobs:
     - name: Docker Login Tencent Registry
       uses: docker/login-action@v1.8.0
       with:
-        registry: ccr.ccs.tencentyun.com
+        registry: ${{ secrets.DOCKER_REGISTRY }}
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - name: Build and push Docker images
@@ -125,8 +125,8 @@ jobs:
         file: ./Dockerfile
         push: true
         tags: |
-           chokho_workspace/health_card:latest
-           chokho_workspace/health_card:${{ env.HEALTH_CARD_VERSION }}
+           ${{ secrets.DOCKER_REGISTRY }}:latest
+           ${{ secrets.DOCKER_REGISTRY }}:${{ env.HEALTH_CARD_VERSION }}
       
   docker-deploy:
     needs: [docker-release]
