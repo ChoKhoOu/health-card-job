@@ -55,8 +55,22 @@ jobs:
       uses: actions/setup-java@v1.4.3
       with:
         java-version: 11
-    - name: Grant execute permission for gradlew
-      run: chmod +x ./gradlew
+    - name: Cache Gradle wrapper
+      id: cache-gradle-wrapper
+      uses: actions/cache@v2.1.4
+      with:
+        path: ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-dependencies-     
+    - name: Cache Dependencies
+      id: cache-dependencies
+      uses: actions/cache@v2.1.4
+      with:
+        path: ~/.gradle/caches
+        key: ${{ runner.os }}-dependencies-${{ hashFiles('**/*.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-dependencies-
     - name: Build with Gradle
       run: ./gradlew clean build -x test
 
