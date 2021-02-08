@@ -141,7 +141,7 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            if test ! -z "$(docker ps --filter ancestor=uswccr.ccs.tencentyun.com/chokho_workspace/health_card -q)"; 
+            if test -n "$(docker ps --filter ancestor=uswccr.ccs.tencentyun.com/chokho_workspace/health_card -q)"; 
             then 
             docker stop $(docker ps --filter ancestor=${{ secrets.DOCKER_REGISTRY }} -q)
             docker rm -f $(docker ps -a --filter ancestor=${{ secrets.DOCKER_REGISTRY }}:latest -q)
