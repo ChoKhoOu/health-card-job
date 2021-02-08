@@ -119,14 +119,15 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - name: Build and push Docker images
-      uses: docker/build-push-action@v2.2.2
+      uses: docker/build-push-action@v2
       with:
         context: .
         file: ./Dockerfile
         push: true
-        tag: |
-           chokho_workspace/health_card:latest
-           chokho_workspace/health_card:${{ env.HEALTH_CARD_VERSION }}
+        platforms: linux/amd64
+        tags: |
+          ${{ secrets.DOCKER_REGISTRY }}:latest
+          ${{ secrets.DOCKER_REGISTRY }}:${{ env.HEALTH_CARD_VERSION }}
       
   docker-deploy:
     needs: [docker-release]
@@ -140,9 +141,12 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            docker stop $(docker ps --filter ancestor=${{ secrets.REGISTRY }} -q)
-            docker rm -f $(docker ps -a --filter ancestor=${{ secrets.REGISTRY }}:latest -q)
-            docker rmi -f $(docker images  ${{ secrets.REGISTRY }}:latest -q)
-            docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ccr.ccs.tencentyun.com
-            docker pull ${{ secrets.REGISTRY }}:latest
-            docker run -d -p ${{ secrets.HOST_PORT }}:${{ secrets.CONTAINER_PORT }} ${{ secrets.REGISTRY }}:latest --restart=always
+            if test -n "$(docker ps --filter ancestor=uswccr.ccs.tencentyun.com/chokho_workspace/health_card -q)"; 
+            then 
+            docker stop $(docker ps --filter ancestor=${{ secrets.DOCKER_REGISTRY }} -q)
+            docker rm -f $(docker ps -a --filter ancestor=${{ secrets.DOCKER_REGISTRY }}:latest -q)
+            docker rmi -f $(docker images  ${{ secrets.DOCKER_REGISTRY }}:latest -q);
+            fi;
+            docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.DOCKER_REGISTRY }}
+            docker pull ${{ secrets.DOCKER_REGISTRY }}:latest
+            docker run -d -p ${{ secrets.HOST_PORT }}:${{ secrets.CONTAINER_PORT }} ${{ secrets.DOCKER_REGISTRY }}:latest --restart=always --name=health-card
