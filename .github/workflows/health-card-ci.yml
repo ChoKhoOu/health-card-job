@@ -141,11 +141,11 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            if test -n "$(docker ps --filter ancestor=uswccr.ccs.tencentyun.com/chokho_workspace/health_card -q)"; 
+            if test -n "$(docker ps -aqf ancestor=uswccr.ccs.tencentyun.com/chokho_workspace/health_card)";
             then 
-            docker stop $(docker ps --filter ancestor=${{ secrets.DOCKER_REGISTRY }} -q)
-            docker rm -f $(docker ps -a --filter ancestor=${{ secrets.DOCKER_REGISTRY }}:latest -q)
-            docker rmi -f $(docker images  ${{ secrets.DOCKER_REGISTRY }}:latest -q);
+            docker stop $(docker ps -fq ancestor=${{ secrets.DOCKER_REGISTRY }})
+            docker rm -f $(docker ps -aqf ancestor=${{ secrets.DOCKER_REGISTRY }}:latest)
+            docker rmi -f $(docker images -q ${{ secrets.DOCKER_REGISTRY }}:latest);
             fi;
             docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.DOCKER_REGISTRY }}
             docker pull ${{ secrets.DOCKER_REGISTRY }}:latest
