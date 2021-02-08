@@ -149,4 +149,4 @@ jobs:
             fi;
             docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.DOCKER_REGISTRY }}
             docker pull ${{ secrets.DOCKER_REGISTRY }}:latest
-            docker run -d -p ${{ secrets.HOST_PORT }}:${{ secrets.CONTAINER_PORT }}  --restart=always --name=health-card ${{ secrets.DOCKER_REGISTRY }}:latest
+            docker run -d -p ${{ secrets.HOST_PORT }}:${{ secrets.CONTAINER_PORT }} -v health_card_application:/application/logs --restart=always --name=health-card ${{ secrets.DOCKER_REGISTRY }}:latest
