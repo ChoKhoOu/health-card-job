@@ -48,6 +48,7 @@ jobs:
       run: ./gradlew check
       
   build:
+    needs: [check]
     runs-on: ubuntu-latest
     steps:
     - name: Set up JDK 11
