@@ -147,6 +147,6 @@ jobs:
             docker rm -f $(docker ps -a --filter ancestor=${{ secrets.DOCKER_REGISTRY }}:latest -q)
             docker rmi -f $(docker images  ${{ secrets.DOCKER_REGISTRY }}:latest -q);
             fi;
-            docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ccr.ccs.tencentyun.com
+            docker login --username=${{ secrets.REGISTRY_USERNAME }} --password=${{ secrets.REGISTRY_PASSWORD }} ${{ secrets.DOCKER_REGISTRY }}
             docker pull ${{ secrets.DOCKER_REGISTRY }}:latest
             docker run -d -p ${{ secrets.HOST_PORT }}:${{ secrets.CONTAINER_PORT }} ${{ secrets.DOCKER_REGISTRY }}:latest --restart=always
