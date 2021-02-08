@@ -1,12 +1,11 @@
-
 plugins {
-    id 'org.springframework.boot' version '2.2.13.RELEASE'
+    id 'org.springframework.boot' version '2.4.2'
     id 'io.spring.dependency-management' version '1.0.11.RELEASE'
     id 'java'
 }
 
 group = 'top.chokhoou'
-version = '0.0.1-SNAPSHOT'
+version = '0.0.1'
 sourceCompatibility = '11'
 
 configurations {
@@ -28,17 +27,16 @@ repositories {
 
 dependencies {
 
-    compile 'com.alibaba.boot:nacos-config-spring-boot-starter:0.2.7'
     compile 'org.springframework.boot:spring-boot-starter-web'
     compile 'org.springframework.boot:spring-boot-starter-aop'
     compile 'org.springframework.boot:spring-boot-starter-quartz'
     compile 'org.springframework.retry:spring-retry'
     compile 'cn.hutool:hutool-all:5.5.7'
     compile 'com.github.ben-manes.caffeine:caffeine:2.8.8'
+    compile 'com.alibaba.nacos:nacos-client:1.4.1'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'com.alibaba.boot:nacos-config-spring-boot-starter:0.2.7'
 }

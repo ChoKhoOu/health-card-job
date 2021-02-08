@@ -3,7 +3,9 @@ package top.chokhoou.healthcardjob.common.constants;
 /**
  * @author ChoKhoOu
  */
-public interface CommonConstant {
+public interface CommonConst {
+    String COLON = ":";
+
     String DATE_FORMAT_WITHOUT_SECOND = "yyyy-MM-dd HH:mm";
 
     /**

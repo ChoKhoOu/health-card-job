@@ -13,15 +13,14 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Recover;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import top.chokhoou.healthcardjob.common.constants.CardConstant;
-import top.chokhoou.healthcardjob.common.constants.CommonConstant;
+import top.chokhoou.healthcardjob.common.constants.CardConst;
+import top.chokhoou.healthcardjob.common.constants.CommonConst;
 import top.chokhoou.healthcardjob.common.enums.ENeedCommit;
 import top.chokhoou.healthcardjob.common.enums.ESchoolApiStatus;
 import top.chokhoou.healthcardjob.entity.Card;
 import top.chokhoou.healthcardjob.entity.dto.CardDTO;
 import top.chokhoou.healthcardjob.service.HealthCardService;
 import top.chokhoou.healthcardjob.util.cache.CacheHolder;
-
 import top.chokhoou.healthcardjob.util.exception.ServiceException;
 
 import java.net.HttpCookie;
@@ -40,17 +39,21 @@ import java.util.concurrent.ConcurrentHashMap;
 public class HealthCardServiceImpl implements HealthCardService {
 
     private static final String TITLE_FORMAT = "%s %s 健康卡填报";
+    private static final String SUCCESS = "Success";
 
     @Override
     @Retryable(value = Exception.class, backoff = @Backoff(delay = 5000, multiplier = 2))
     public void commitHealthCard(Card card, HttpCookie[] cookies) {
-
+        String state;
+        if ((state = getCommitLogMap().get(card.getGh())) != null && SUCCESS.equals(state)) {
+            return;
+        }
         CardDTO cardDTO = buildCardDTO(card);
         JSONObject body = new JSONObject().set("entity", cardDTO);
-        HttpResponse response = HttpRequest.post(CommonConstant.COMMIT_URL)
+        HttpResponse response = HttpRequest.post(CommonConst.COMMIT_URL)
                 .body(body.toString())
                 .cookie(cookies)
-                .header("Referer", CommonConstant.COMMIT_REFERER)
+                .header("Referer", CommonConst.COMMIT_REFERER)
                 .timeout(3000)
                 .execute();
 
@@ -66,7 +69,7 @@ public class HealthCardServiceImpl implements HealthCardService {
         }
 
         //success
-        getCommitLogMap().put(card.getGh(), "Success");
+        getCommitLogMap().put(card.getGh(), SUCCESS);
     }
 
 
@@ -79,7 +82,7 @@ public class HealthCardServiceImpl implements HealthCardService {
         param.set("empcode", studentId);
         root.set("params", param);
         HttpResponse getInfo = HttpRequest
-                .post(CommonConstant.QUERY_URL)
+                .post(CommonConst.QUERY_URL)
                 .cookie(cookies)
                 .body(root.toString())
                 .execute();
@@ -90,10 +93,10 @@ public class HealthCardServiceImpl implements HealthCardService {
         }
         Card card = JSONUtil.parseObj(list.get(0), new JSONConfig().setIgnoreCase(true)).toBean(Card.class);
         card.setNeedCommit(ENeedCommit.YES.getValue())
-                .setCn(CardConstant.CN)
-                .set_ext(CardConstant.EXT)
-                .set__type(CardConstant.TYPE)
-                .setBz(CardConstant.BZ);
+                .setCn(CardConst.CN)
+                .set_ext(CardConst.EXT)
+                .set__type(CardConst.TYPE)
+                .setBz(CardConst.BZ);
         card.setId(null);
         return card;
     }
@@ -101,7 +104,7 @@ public class HealthCardServiceImpl implements HealthCardService {
     @Override
     public HttpCookie[] getCookies() {
         HttpResponse executionResponse = HttpRequest
-                .get(CommonConstant.EXECUTION_URL)
+                .get(CommonConst.EXECUTION_URL)
                 .timeout(2000)
                 .execute();
         String body = executionResponse.body();
@@ -112,7 +115,7 @@ public class HealthCardServiceImpl implements HealthCardService {
 
         String[] bodySplit = split[1].split("\"");
         String execution = bodySplit[0];
-        HttpCookie jSessionId = executionResponse.getCookie(CommonConstant.JSESSION_ID);
+        HttpCookie jSessionId = executionResponse.getCookie(CommonConst.JSESSION_ID);
 
         // login
         Map<String, Object> form = new HashMap<>();
@@ -122,16 +125,16 @@ public class HealthCardServiceImpl implements HealthCardService {
         form.put("_eventId", "submit");
         form.put("loginType", "1");
         form.put("submit", "登 录");
-        HttpResponse response = HttpRequest.post(CommonConstant.LOGIN_URL)
+        HttpResponse response = HttpRequest.post(CommonConst.LOGIN_URL)
                 .cookie(jSessionId)
                 .form(form)
                 .execute();
         String loginBody = response.body();
         JSONObject jsonObject = JSONUtil.parseObj(loginBody);
 
-        String CastgcCookie = jsonObject.getJSONObject("cookie").getStr(CommonConstant.CASTGC);
+        String CastgcCookie = jsonObject.getJSONObject("cookie").getStr(CommonConst.CASTGC);
         LinkedList<HttpCookie> httpCookies = new LinkedList<>();
-        httpCookies.add(new HttpCookie(CommonConstant.CASTGC, CastgcCookie));
+        httpCookies.add(new HttpCookie(CommonConst.CASTGC, CastgcCookie));
         httpCookies.add(jSessionId);
 
         return httpCookies.toArray(new HttpCookie[0]);
@@ -162,7 +165,7 @@ public class HealthCardServiceImpl implements HealthCardService {
                 .setSfqwhb(card.getSfqwhb())
                 .setJqqx(card.getJqqx())
                 .setXjzdz(card.getXjzdz())
-                .setTjsj(DateUtil.format(now, new SimpleDateFormat(CommonConstant.DATE_FORMAT_WITHOUT_SECOND)))
+                .setTjsj(DateUtil.format(now, new SimpleDateFormat(CommonConst.DATE_FORMAT_WITHOUT_SECOND)))
                 .setTbrq(DateUtil.formatDate(now))
                 .setLxdh(card.getLxdh())
                 .setSsh(card.getSsh())
@@ -185,7 +188,7 @@ public class HealthCardServiceImpl implements HealthCardService {
     }
 
     private Map<String, String> getCommitLogMap(DateTime key) {
-        return getCommitLogMap(DateUtil.format(key, new SimpleDateFormat(CommonConstant.DATE_FORMAT_WITHOUT_SECOND)));
+        return getCommitLogMap(DateUtil.format(key, new SimpleDateFormat(CommonConst.DATE_FORMAT_WITHOUT_SECOND)));
     }
 
     private Map<String, String> getCommitLogMap(String key) {

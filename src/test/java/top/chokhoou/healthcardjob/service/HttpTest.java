@@ -1,23 +1,18 @@
 package top.chokhoou.healthcardjob.service;
 
-import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
-import cn.hutool.http.HttpUtil;
-import cn.hutool.json.JSON;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONConfig;
 import cn.hutool.json.JSONObject;
 import cn.hutool.json.JSONUtil;
 import org.junit.jupiter.api.Test;
-import top.chokhoou.healthcardjob.common.constants.CommonConstant;
+import top.chokhoou.healthcardjob.common.constants.CommonConst;
 import top.chokhoou.healthcardjob.entity.Card;
 import top.chokhoou.healthcardjob.entity.dto.CardDTO;
 
 import java.net.HttpCookie;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -123,7 +118,7 @@ public class HttpTest {
                 .setSfqwhb(card.getSfqwhb())
                 .setJqqx(card.getJqqx())
                 .setXjzdz(card.getXjzdz())
-                .setTjsj(DateUtil.format(now, new SimpleDateFormat(CommonConstant.DATE_FORMAT_WITHOUT_SECOND)))
+                .setTjsj(DateUtil.format(now, new SimpleDateFormat(CommonConst.DATE_FORMAT_WITHOUT_SECOND)))
                 .setTbrq(DateUtil.formatDate(now))
                 .setLxdh(card.getLxdh())
                 .setSsh(card.getSsh())
