@@ -124,7 +124,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        platforms: linux/386,linux/amd64
+        platforms: linux/amd64
         tags: |
           ${{ secrets.DOCKER_REGISTRY }}:latest
           ${{ secrets.DOCKER_REGISTRY }}:${{ env.HEALTH_CARD_VERSION }}
