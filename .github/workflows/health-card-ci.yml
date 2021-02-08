@@ -124,7 +124,7 @@ jobs:
         context: .
         file: ./Dockerfile
         push: true
-        tag: |
+        tags: |
            chokho_workspace/health_card:latest
            chokho_workspace/health_card:${{ env.HEALTH_CARD_VERSION }}
       
