@@ -22,4 +22,4 @@ ENV JVM_XMS="64m" \
 RUN ln -sf /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo $TZ > /etc/timezone
 
-ENTRYPOINT ["java", "-Xms${JVM_XMS}","-Xmx${JVM_XMX}", "org.springframework.boot.loader.JarLauncher"]
+ENTRYPOINT java -Xms${JVM_XMS} -Xmx${JVM_XMX} org.springframework.boot.loader.JarLauncher
