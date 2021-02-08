@@ -6,10 +6,13 @@ name: Health Card CI
 on:
   push:
     branches: [ master ]
-    paths: 
+    paths:
+      - "**" 
       - '!**.md'
   pull_request:
-    branches: [ master ]
+    paths:
+      - "**" 
+      - '!**.md'
   release:
     types:
       - created
