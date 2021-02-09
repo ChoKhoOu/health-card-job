@@ -15,11 +15,13 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import top.chokhoou.healthcardjob.common.constants.CardConst;
 import top.chokhoou.healthcardjob.common.constants.CommonConst;
+import top.chokhoou.healthcardjob.common.constants.NacosConst;
 import top.chokhoou.healthcardjob.common.enums.ENeedCommit;
 import top.chokhoou.healthcardjob.common.enums.ESchoolApiStatus;
 import top.chokhoou.healthcardjob.entity.Card;
 import top.chokhoou.healthcardjob.entity.dto.CardDTO;
 import top.chokhoou.healthcardjob.service.HealthCardService;
+import top.chokhoou.healthcardjob.util.NacosUtil;
 import top.chokhoou.healthcardjob.util.cache.CacheHolder;
 import top.chokhoou.healthcardjob.util.exception.ServiceException;
 
@@ -119,8 +121,10 @@ public class HealthCardServiceImpl implements HealthCardService {
 
         // login
         Map<String, Object> form = new HashMap<>();
-        form.put("username", "04171208");
-        form.put("password", "034339");
+        String username = NacosUtil.healthCard().getConfigString(NacosConst.USERNAME);
+        String password = NacosUtil.healthCard().getConfigString(NacosConst.PASSWORD);
+        form.put("username", username);
+        form.put("password", password);
         form.put("execution", execution);
         form.put("_eventId", "submit");
         form.put("loginType", "1");
@@ -129,6 +133,9 @@ public class HealthCardServiceImpl implements HealthCardService {
                 .cookie(jSessionId)
                 .form(form)
                 .execute();
+        if (response.isOk()) {
+            log.info("账号登录成功");
+        }
         String loginBody = response.body();
         JSONObject jsonObject = JSONUtil.parseObj(loginBody);
 

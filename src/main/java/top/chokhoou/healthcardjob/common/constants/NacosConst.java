@@ -7,7 +7,17 @@ package top.chokhoou.healthcardjob.common.constants;
  */
 public interface NacosConst {
     /**
-     * 学号
+     * 学号列表
      */
     String STUDENT_IDS = "student_ids";
+
+    /**
+     * 登录账号
+     */
+    String USERNAME = "username";
+
+    /**
+     * 登录密码
+     */
+    String PASSWORD = "password";
 }

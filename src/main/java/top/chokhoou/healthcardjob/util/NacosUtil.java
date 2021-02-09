@@ -22,7 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Slf4j
 public class NacosUtil {
-    private static final String NACOS_SERVER_ADDR = "127.0.0.1";
+    private static final String NACOS_SERVER_ADDR = "172.17.0.1";
 
     /*************** group id start **************/
     private static final String NACOS_GROUP_HEALTH_CARD = "health_card";
