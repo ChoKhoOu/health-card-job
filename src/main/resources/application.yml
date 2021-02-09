@@ -3,3 +3,5 @@ logging:
     root: info
   file:
     name: ../application/logs/application.log
+server:
+  port: 7777
