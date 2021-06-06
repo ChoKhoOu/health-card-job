@@ -14,7 +14,6 @@ COPY --from=builder application/spring-boot-loader/ ./
 COPY --from=builder application/snapshot-dependencies/ ./
 COPY --from=builder application/application/ ./
 
-# JVM_XMS and JVM_XMX configs deprecated for removal in halov1.4.4
 ENV JVM_XMS="64m" \
     JVM_XMX="64m" \
     TZ=Asia/Shanghai

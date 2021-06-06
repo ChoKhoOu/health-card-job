@@ -77,7 +77,6 @@ public class HealthCardServiceImpl implements HealthCardService {
 
     @Override
     public Card getStudent(String studentId, HttpCookie[] cookies) {
-
         JSONObject root = new JSONObject();
         JSONObject param = new JSONObject();
         root.set("querySqlId", "com.sudytech.work.jlzh.jkxxtb.jkxxcj.queryNear");
@@ -88,11 +87,11 @@ public class HealthCardServiceImpl implements HealthCardService {
                 .cookie(cookies)
                 .body(root.toString())
                 .execute();
-
         List<String> list = JSONUtil.toList(JSONUtil.parseObj(getInfo.body()).getJSONArray("list").toString(), String.class);
         if (list == null || list.isEmpty()) {
             return null;
         }
+
         Card card = JSONUtil.parseObj(list.get(0), new JSONConfig().setIgnoreCase(true)).toBean(Card.class);
         card.setNeedCommit(ENeedCommit.YES.getValue())
                 .setCn(CardConst.CN)
@@ -100,6 +99,7 @@ public class HealthCardServiceImpl implements HealthCardService {
                 .set__type(CardConst.TYPE)
                 .setBz(CardConst.BZ);
         card.setId(null);
+
         return card;
     }
 
@@ -118,7 +118,6 @@ public class HealthCardServiceImpl implements HealthCardService {
         String[] bodySplit = split[1].split("\"");
         String execution = bodySplit[0];
         HttpCookie jSessionId = executionResponse.getCookie(CommonConst.JSESSION_ID);
-
         // login
         Map<String, Object> form = new HashMap<>();
         String username = NacosUtil.healthCard().getConfigString(NacosConst.USERNAME);
@@ -130,6 +129,12 @@ public class HealthCardServiceImpl implements HealthCardService {
         form.put("loginType", "1");
         form.put("submit", "登 录");
         HttpResponse response = HttpRequest.post(CommonConst.LOGIN_URL)
+                .header("Referer", "https://servicewechat.com/wxfedb987db81a675e/78/page-frame.html")
+                .header("user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E217 MicroMessenger/6.8.0(0x16080000) NetType/WIFI Language/en Branch/Br_trunk MiniProgramEnv/Mac")
+                .header("Accept-Language", "zh-cn")
+                .header("Content-Type", "application/x-www-form-urlencoded")
+                .header("accept-encoding", "gzip, deflate, br")
+                .header("Accept", "*/*")
                 .cookie(jSessionId)
                 .form(form)
                 .execute();
@@ -138,12 +143,10 @@ public class HealthCardServiceImpl implements HealthCardService {
         }
         String loginBody = response.body();
         JSONObject jsonObject = JSONUtil.parseObj(loginBody);
-
         String CastgcCookie = jsonObject.getJSONObject("cookie").getStr(CommonConst.CASTGC);
         LinkedList<HttpCookie> httpCookies = new LinkedList<>();
         httpCookies.add(new HttpCookie(CommonConst.CASTGC, CastgcCookie));
         httpCookies.add(jSessionId);
-
         return httpCookies.toArray(new HttpCookie[0]);
     }
 
